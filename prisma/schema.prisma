@@ -1,0 +1,22 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model StockPredict {
+  id               Int       @id @default(autoincrement())
+  stockCode       String    @db.VarChar(20) @map(name: "stock_code")
+  stockName       String?   @db.VarChar(20) @map(name: "stock_name")
+  comment          String?   @db.VarChar(200)
+  createTime      DateTime? @default(dbgenerated("NOW() ON UPDATE NOW()")) @db.DateTime(0) @map(name: "create_time")
+  confidenceGrade Int?      @db.TinyInt @map(name: "confidence_grade")
+  goalPrice       String?   @db.VarChar(100) @map(name: "goal_price")
+  userName        String?   @db.VarChar(20) @map(name: "user_name")
+
+  @@map("stock_predict")
+}
