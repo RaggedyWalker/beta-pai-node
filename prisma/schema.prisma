@@ -15,6 +15,7 @@ model StockPredict {
   comment         String?   @db.VarChar(200)
   createTime      DateTime? @default(now()) @map("create_time") @db.DateTime(0)
   confidenceGrade Int?      @map("confidence_grade") @db.TinyInt
+  predictTrend    Int?      @map("predict_trend") @db.TinyInt
   goalPrice       String?   @map("goal_price") @db.VarChar(100)
   userName        String?   @map("user_name") @db.VarChar(20)
   status          Boolean   @default(true)
