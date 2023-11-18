@@ -9,14 +9,15 @@ datasource db {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model StockPredict {
-  id               Int       @id @default(autoincrement())
-  stockCode       String    @db.VarChar(20) @map(name: "stock_code")
-  stockName       String?   @db.VarChar(20) @map(name: "stock_name")
-  comment          String?   @db.VarChar(200)
-  createTime      DateTime? @default(dbgenerated("NOW() ON UPDATE NOW()")) @db.DateTime(0) @map(name: "create_time")
-  confidenceGrade Int?      @db.TinyInt @map(name: "confidence_grade")
-  goalPrice       String?   @db.VarChar(100) @map(name: "goal_price")
-  userName        String?   @db.VarChar(20) @map(name: "user_name")
+  id              Int       @id @default(autoincrement())
+  stockCode       String    @map("stock_code") @db.VarChar(20)
+  stockName       String?   @map("stock_name") @db.VarChar(20)
+  comment         String?   @db.VarChar(200)
+  createTime      DateTime? @default(now()) @map("create_time") @db.DateTime(0)
+  confidenceGrade Int?      @map("confidence_grade") @db.TinyInt
+  goalPrice       String?   @map("goal_price") @db.VarChar(100)
+  userName        String?   @map("user_name") @db.VarChar(20)
+  status          Boolean   @default(true)
 
   @@map("stock_predict")
 }
