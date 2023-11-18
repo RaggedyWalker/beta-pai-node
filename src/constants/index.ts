@@ -7,7 +7,7 @@ export enum ConfidenceGradeEnum {
   WEAK = 4
 }
 
-export const ConfidenceGrade: EnumList = [
+export const ConfidenceGradeEnumList: EnumList = [
   { label: '确定', value: ConfidenceGradeEnum.CONFIRM },
   { label: '强', value: ConfidenceGradeEnum.STRONG },
   { label: '中', value: ConfidenceGradeEnum.MEDIUM },
