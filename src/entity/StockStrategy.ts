@@ -4,12 +4,12 @@ import { ConfidenceGradeEnum, PredictTrendEnum } from '../enums';
 class StockStrategy {
   public id: number;
   public stockCode: string;
-  public stockName: string;
-  public comment: string;
-  public confidenceGrade: ConfidenceGradeEnum;
-  public goalPrice: string;
-  public userName: string;
-  public predictTrendEnum: PredictTrendEnum;
+  public stockName: string | null;
+  public comment: string | null;
+  public confidenceGrade: ConfidenceGradeEnum | null;
+  public goalPrice: string | null;
+  public userName: string | null;
+  public predictTrend: PredictTrendEnum | null;
 
   constructor(obj: StrategyProperties) {
     this.id = obj.id;
@@ -19,7 +19,7 @@ class StockStrategy {
     this.confidenceGrade = obj.confidenceGrade;
     this.goalPrice = obj.goalPrice;
     this.userName = obj.userName;
-    this.predictTrendEnum = obj.predictTrendEnum;
+    this.predictTrend = obj.predictTrend;
   }
 }
 

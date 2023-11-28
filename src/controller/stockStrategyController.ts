@@ -2,6 +2,14 @@ import StockStrategy from '../entity/StockStrategy';
 import { Context, Next } from 'koa';
 import { StrategyProperties } from '../types/entity';
 import db from '../utils/db.ts';
+import { confidenceGradeEnumList, predictTrendEnumList } from '../constants';
+import { StrategyPropertiesResponse } from '../types/response.ts';
+import { Page } from '../entity/common';
+
+interface StockStrategyQuery {
+  currentPage: number;
+  pageSize: number;
+}
 
 class StockStrategyController {
   /**
@@ -67,15 +75,50 @@ class StockStrategyController {
    */
   public static async update(ctx: Context, next: Next): Promise<void> {
     const data = new StockStrategy(ctx.request.body as StrategyProperties);
-    const user = await db.stockPredict.update({
+    const record = await db.stockPredict.update({
       where: {
         id: data.id
       },
       data
     });
-    console.log('更新记录:', user);
+    console.log('更新记录:', record);
     // 新增记录
-    ctx.body = user;
+    ctx.body = record;
+    await next();
+  }
+
+  /**
+   * Retrieves a page of stock prediction strategies.
+   *
+   * @param {Context} ctx - The Koa context object.
+   * @param {Next} next - The Koa next function.
+   * @return {Promise<void>}
+   */
+  public static async getPage(ctx: Context, next: Next): Promise<void> {
+    const { pageSize, currentPage } = ctx.request.body as StockStrategyQuery;
+    const total = await db.stockPredict.count({});
+    const page: Page<StrategyPropertiesResponse> =
+      new Page<StrategyPropertiesResponse>();
+    if (total > 0) {
+      const list = await db.stockPredict.findMany({
+        skip: pageSize * (currentPage - 1),
+        take: pageSize
+      });
+      const processedList = list.map(item => ({
+        ...item,
+        confidenceGradeText: confidenceGradeEnumList.find(
+          obj => obj.value === item.confidenceGrade
+        )?.label,
+        predictTrendText: predictTrendEnumList.find(
+          obj => obj.value === item.predictTrend
+        )?.label
+      }));
+      page.total = total;
+      page.pageSize = pageSize;
+      page.currentPage = currentPage;
+      page.list = processedList;
+    }
+    ctx.body = page;
     await next();
   }
 }

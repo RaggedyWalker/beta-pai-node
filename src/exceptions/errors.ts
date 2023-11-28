@@ -11,3 +11,12 @@ export class UndefinedConfigureError extends BaseException {
     this.message = msg || '未找到配置枚举';
   }
 }
+
+export class ExternalRequestError extends BaseException {
+  status = 500;
+  code = 500001;
+  constructor(msg?: string) {
+    super();
+    this.message = msg || '未找到配置枚举';
+  }
+}
