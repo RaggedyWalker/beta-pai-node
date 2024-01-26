@@ -6,4 +6,5 @@ const router = new Router({
 });
 router.allowedMethods();
 router.post('/api', sourceDataController.get);
+router.get('/stock/search', sourceDataController.searchStock);
 export default router;
