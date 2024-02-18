@@ -1,7 +1,7 @@
 import { Context, Next } from 'koa';
 import akShareService from '../externalService/akShareService.ts';
 import { ExternalRequestError } from '../exceptions/errors.ts';
-import mairuiService from '../externalService/mairuiService.ts';
+import db from '../utils/db.ts';
 
 class StockStrategyController {
   /**
@@ -24,20 +24,23 @@ class StockStrategyController {
   }
 
   public static async searchStock(ctx: Context, next: Next): Promise<void> {
-    type Stock = { dm: string; mc: string; jys: string };
+    type Stock = {
+      stockName: string;
+      stockCode: string;
+      market: string | null;
+    };
     const query = ctx.request.query;
     const key = query.query as string;
     try {
-      // const data = await akShareService('stock_info_a_code_name');
-      const data = await mairuiService.getStockList();
-      ctx.body = data.data
+      const data = await db.stock.findMany();
+      ctx.body = data
         .filter(
           (item: Stock) =>
-            item.dm.indexOf(key) > -1 || item.mc.indexOf(key) > -1
+            item.stockCode.indexOf(key) > -1 || item.stockName.indexOf(key) > -1
         )
         .map((item: Stock) => ({
-          stockName: item.mc,
-          stockCode: item.dm + '.' + item.jys.toUpperCase()
+          stockName: item.stockName,
+          stockCode: item.stockCode
         }));
       await next();
     } catch (e) {

@@ -8,6 +8,15 @@ datasource db {
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Stock {
+  stockCode String  @id @map("stock_code") @db.VarChar(10)
+  stockName String  @map("stock_name") @db.VarChar(20)
+  market    String? @map("market") @db.VarChar(6)
+
+  @@index([stockCode, market])
+  @@map("all_stocks")
+}
+
 model StockPredict {
   id              Int       @id @default(autoincrement())
   stockCode       String    @map("stock_code") @db.VarChar(20)
@@ -16,9 +25,27 @@ model StockPredict {
   createTime      DateTime? @default(now()) @map("create_time") @db.DateTime(0)
   confidenceGrade Int?      @map("confidence_grade") @db.TinyInt
   predictTrend    Int?      @map("predict_trend") @db.TinyInt
-  goalPrice       String?   @map("goal_price") @db.VarChar(100)
+  goalPrice       Decimal   @map("goal_price") @db.Decimal(8, 2)
   userName        String?   @map("user_name") @db.VarChar(20)
   status          Boolean   @default(true)
 
   @@map("stock_predict")
+}
+
+model StockDayLine {
+  id        Int      @id @default(autoincrement())
+  code      String   @db.VarChar(10)
+  high      Decimal  @db.Decimal(8, 2)
+  low       Decimal  @db.Decimal(8, 2)
+  open      Decimal  @db.Decimal(8, 2)
+  close     Decimal  @db.Decimal(8, 2)
+  volume    BigInt   @db.BigInt
+  amount    Decimal  @db.Decimal(16, 2)
+  time      DateTime @db.Date
+  unit      String   @default("元") @db.VarChar(4)
+  growthPct Float  @map("growth_pct") @db.Float
+  ampPct    Float  @map("amp_pct") @db.Float
+
+  @@index([code])
+  @@map("stock_day_line")
 }

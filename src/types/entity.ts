@@ -6,7 +6,7 @@ export interface StrategyProperties {
   stockName: string | null;
   comment: string | null;
   confidenceGrade: ConfidenceGradeEnum | null;
-  goalPrice: string | null;
+  goalPrice: number;
   userName: string | null;
   predictTrend: PredictTrendEnum | null;
   status: boolean;

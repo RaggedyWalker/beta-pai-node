@@ -7,9 +7,10 @@ class StockStrategy {
   public stockName: string | null;
   public comment: string | null;
   public confidenceGrade: ConfidenceGradeEnum | null;
-  public goalPrice: string | null;
+  public goalPrice: number;
   public userName: string | null;
   public predictTrend: PredictTrendEnum | null;
+  public status: boolean;
 
   constructor(obj: StrategyProperties) {
     this.id = obj.id;
@@ -20,6 +21,7 @@ class StockStrategy {
     this.goalPrice = obj.goalPrice;
     this.userName = obj.userName;
     this.predictTrend = obj.predictTrend;
+    this.status = obj.status;
   }
 }
 

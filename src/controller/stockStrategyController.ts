@@ -34,6 +34,7 @@ class StockStrategyController {
    */
   public static async add(ctx: Context, next: Next): Promise<void> {
     const data = new StockStrategy(ctx.request.body as StrategyProperties);
+    // data.goalPrice = new Prisma.Decimal(data.goalPrice);
     const user = await db.stockPredict.create({
       data
     });
@@ -102,7 +103,10 @@ class StockStrategyController {
     if (total > 0) {
       const list = await db.stockPredict.findMany({
         skip: pageSize * (currentPage - 1),
-        take: pageSize
+        take: pageSize,
+        orderBy: {
+          createTime: 'desc'
+        }
       });
       const processedList = list.map(item => ({
         ...item,
@@ -111,7 +115,8 @@ class StockStrategyController {
         )?.label,
         predictTrendText: predictTrendEnumList.find(
           obj => obj.value === item.predictTrend
-        )?.label
+        )?.label,
+        goalPrice: item.goalPrice.toNumber()
       }));
       page.total = total;
       page.pageSize = pageSize;

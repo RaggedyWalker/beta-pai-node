@@ -29,3 +29,7 @@ export interface Page<T> {
   total: number;
   list: T[];
 }
+
+export interface FetchResult {
+  [key: string]: string | number;
+}
