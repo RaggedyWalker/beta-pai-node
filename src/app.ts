@@ -20,7 +20,7 @@ app.use(
     enableTypes: ['json', 'form', 'text']
   })
 );
-app.use(json());
+// app.use(json());
 app.use(koa_static(__dirname + '/public'));
 // logger
 app.use(async (ctx, next) => {
