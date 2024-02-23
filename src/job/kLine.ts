@@ -10,50 +10,6 @@ type Stock = {
 };
 
 /**
- *  更新所有股票日线数据
- *
- * @description
- * 对于没有日线数据的股票，保存全量数据。如果已有数据，则从最新日期开始更新数据。
- *
- * 对于保存失败的股票，进入重试队列，稍后进入重试队列。
- * @param stockList
- */
-async function updateALLStockDayLine(stockList: Stock[]) {
-  const start = Date.now();
-  const failStockList: Stock[] = [];
-  const len = stockList.length;
-  for (let i = 0; i < len; i++) {
-    const stock = stockList[i];
-    try {
-      await updateStockDayLine(stock);
-      console.log(`update stockDayLine: ${i + 1} /${len}`);
-    } catch (e) {
-      failStockList.push(stock);
-    }
-  }
-
-  const failLen = failStockList.length;
-  if (failLen > 0) {
-    console.log('retry update stockDayLine');
-    for (let i = 0; i < failLen; i++) {
-      const stock = failStockList[i];
-      try {
-        await updateStockDayLine(stock);
-        console.log(`update stockDayLine: ${i + 1} /${len}`);
-      } catch (e) {
-        console.error(`retry update stockDayLine fail: ${stock.stockCode}`);
-        console.error('reason: ', e);
-      }
-    }
-  }
-  console.log(
-    '=======================\nupdate stockDayLine end \nuse time:',
-    (Date.now() - start) / 1000,
-    's'
-  );
-}
-
-/**
  * 更新股票日线数据
  * @param stock
  */
@@ -97,6 +53,62 @@ function formatStockList(stockCode: string, list: FetchResult[]) {
       ampPct: item['振幅'] as number
     };
   });
+}
+
+/**
+ *  更新所有股票日线数据
+ *
+ * @description
+ * 对于没有日线数据的股票，保存全量数据。如果已有数据，则从最新日期开始更新数据。
+ *
+ * 对于保存失败的股票，进入重试队列，稍后进入重试队列。
+ * @param stockList 股票列表
+ * @param step 异步任务切片的步长
+ */
+async function updateALLStockDayLine(stockList: Stock[], step = 10) {
+  const start = Date.now();
+  const total = stockList.length;
+  let successCount = 0;
+  const failStockList: Stock[] = [];
+
+  for (let i = 0; i < total; i = i + step) {
+    const subStockList = stockList.slice(i, i + step);
+    await batchUpdateStockDayLine(subStockList);
+  }
+
+  async function batchUpdateStockDayLine(stockList: Stock[]) {
+    const promises = stockList.map(stock => update(stock));
+    await Promise.all(promises);
+  }
+  async function update(stock: Stock) {
+    try {
+      await updateStockDayLine(stock);
+      console.log(`update stockDayLine: ${++successCount} /${total}`);
+    } catch (e) {
+      failStockList.push(stock);
+    }
+  }
+
+  // 失败重试机制
+  const failLen = failStockList.length;
+  if (failLen > 0) {
+    console.log('retry update stockDayLine');
+    for (let i = 0; i < failLen; i++) {
+      const stock = failStockList[i];
+      try {
+        await updateStockDayLine(stock);
+        console.log(`update stockDayLine: ${i + 1} /${total}`);
+      } catch (e) {
+        console.error(`retry update stockDayLine fail: ${stock.stockCode}`);
+        console.error('reason: ', e);
+      }
+    }
+  }
+  console.log(
+    '=======================\nupdate stockDayLine end \nuse time:',
+    (Date.now() - start) / 1000,
+    's'
+  );
 }
 
 export default { updateALLStockDayLine };

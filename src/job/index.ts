@@ -4,7 +4,7 @@ async function main() {
   const list = await stock.updateAllStock();
   console.log(list);
 
-  await kLine.updateALLStockDayLine(list);
+  await kLine.updateALLStockDayLine(list, 50);
 }
 main();
 
