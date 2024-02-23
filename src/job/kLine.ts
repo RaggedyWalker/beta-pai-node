@@ -19,6 +19,7 @@ type Stock = {
  * @param stockList
  */
 async function updateALLStockDayLine(stockList: Stock[]) {
+  const start = Date.now();
   const failStockList: Stock[] = [];
   const len = stockList.length;
   for (let i = 0; i < len; i++) {
@@ -45,6 +46,11 @@ async function updateALLStockDayLine(stockList: Stock[]) {
       }
     }
   }
+  console.log(
+    '=======================\nupdate stockDayLine end \nuse time:',
+    (Date.now() - start) / 1000,
+    's'
+  );
 }
 
 /**
@@ -58,12 +64,12 @@ async function updateStockDayLine(stock: Stock) {
       code: stockCode
     },
     orderBy: {
-      time: 'desc'
+      timestamp: 'desc'
     }
   });
   // 用数据库中的已有最新日期t+1为开始时间
   const startDate = result
-    ? dayjs(result.time).add(1, 'day').format('YYYYMMDD')
+    ? dayjs(result.timestamp).add(1, 'day').format('YYYYMMDD')
     : null;
   const list = await akShareService('stock_zh_a_hist', {
     symbol: stockCode,
@@ -77,10 +83,10 @@ async function updateStockDayLine(stock: Stock) {
 }
 function formatStockList(stockCode: string, list: FetchResult[]) {
   return list.map(item => {
-    const time = new Date(item['日期']);
+    const timestamp = new Date(item['日期']);
     return {
       code: stockCode,
-      time,
+      timestamp,
       open: item['开盘'] as number,
       close: item['收盘'] as number,
       high: item['最高'] as number,
