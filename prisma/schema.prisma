@@ -41,10 +41,10 @@ model StockDayLine {
   close     Decimal  @db.Decimal(8, 2)
   volume    BigInt   @db.BigInt
   amount    Decimal  @db.Decimal(16, 2)
-  time      DateTime @db.Date
+  timestamp DateTime @map("time") @db.Date
   unit      String   @default("元") @db.VarChar(4)
-  growthPct Float  @map("growth_pct") @db.Float
-  ampPct    Float  @map("amp_pct") @db.Float
+  growthPct Float    @map("growth_pct") @db.Float
+  ampPct    Float    @map("amp_pct") @db.Float
 
   @@index([code])
   @@map("stock_day_line")

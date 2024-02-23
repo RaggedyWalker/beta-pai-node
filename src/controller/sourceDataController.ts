@@ -30,7 +30,7 @@ class StockStrategyController {
       market: string | null;
     };
     const query = ctx.request.query;
-    const key = query.query as string;
+    const key = (query.query as string).toUpperCase();
     try {
       const data = await db.stock.findMany();
       ctx.body = data
