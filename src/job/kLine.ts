@@ -78,7 +78,7 @@ async function updateALLStockDayLine(stockList: Stock[], step = 10) {
 
   async function batchUpdateStockDayLine(stockList: Stock[]) {
     const promises = stockList.map(stock => update(stock));
-    await Promise.all(promises);
+    await Promise.allSettled(promises);
   }
   async function update(stock: Stock) {
     try {
