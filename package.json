@@ -15,7 +15,8 @@
     "lint-fix": "eslint --fix ./src/**/*.(js|ts) ./bin/*",
     "clear": "rimraf dist/**/*",
     "build": "npm run clear;tsc",
-    "start:prod": "pm2 startOrReload pm2-start.json"
+    "start:prod": "pm2 startOrReload pm2-start.json",
+    "job": "ts-node src/job"
   },
   "dependencies": {
     "@koa/cors": "^4.0.0",

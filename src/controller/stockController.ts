@@ -28,7 +28,14 @@ class StockController {
       }
     });
 
-    ctx.body = JSONBig.parse(JSONBig.stringify(data));
+    ctx.body = JSONBig.parse(
+      JSONBig.stringify(
+        data.map(item => ({
+          ...item,
+          timestamp: item.timestamp.getTime()
+        }))
+      )
+    );
     await next();
   }
 }
