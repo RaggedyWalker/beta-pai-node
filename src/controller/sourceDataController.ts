@@ -1,7 +1,7 @@
 import { Context, Next } from 'koa';
-import akShareService from '../externalService/akShareService.ts';
-import { ExternalRequestError } from '../exceptions/errors.ts';
-import db from '../utils/db.ts';
+import akShareService from '../externalService/akShareService';
+import { ExternalRequestError } from '../exceptions/errors';
+import db from '../utils/db';
 
 class StockStrategyController {
   /**

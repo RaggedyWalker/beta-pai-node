@@ -1,5 +1,5 @@
 import Router from '@koa/router';
-import sourceDataController from '../controller/sourceDataController.ts';
+import sourceDataController from '../controller/sourceDataController';
 
 const router = new Router({
   prefix: '/source'

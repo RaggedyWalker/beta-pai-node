@@ -1,9 +1,9 @@
 import StockStrategy from '../entity/StockStrategy';
 import { Context, Next } from 'koa';
 import { StrategyProperties } from '../types/entity';
-import db from '../utils/db.ts';
+import db from '../utils/db';
 import { confidenceGradeEnumList, predictTrendEnumList } from '../constants';
-import { StrategyPropertiesResponse } from '../types/response.ts';
+import { StrategyPropertiesResponse } from '../types/response';
 import { Page } from '../entity/common';
 
 interface StockStrategyQuery {

@@ -1,7 +1,7 @@
 import { Context, Next } from 'koa';
 import * as constants from '../constants';
 // import { objectKey } from '../types/utils.ts';
-import { UndefinedConfigureError } from '../exceptions/errors.ts';
+import { UndefinedConfigureError } from '../exceptions/errors';
 
 class ConfigureController {
   public static async get(ctx: Context, next: Next): Promise<void> {

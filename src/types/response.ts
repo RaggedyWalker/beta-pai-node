@@ -1,4 +1,4 @@
-import { StrategyProperties } from './entity.ts';
+import { StrategyProperties } from './entity';
 
 export interface StrategyPropertiesResponse extends StrategyProperties {
   confidenceGradeText?: string;

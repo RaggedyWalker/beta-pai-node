@@ -3,9 +3,11 @@
     {
       "name": "beta-node-server",
       "script": "./dist/bin/www.js",
-      "instances": "2",
+//      "script": "ts-node",
+//      "args": "bin/www",
+      "instances": "max",
       "exec_mode": "cluster",
-      "watch": false,
+      "watch": true,
       "watch_delay": 4000,
       "ignore_watch" : [
         "node_modules",
@@ -16,7 +18,8 @@
       "max_restarts": 5,
       "error_file": "./logs/pm2_xl_account_err.log",
       "out_file": "/dev/null",
-      "log_date_format": "YYYY-MM-DD HH:mm Z"
+      "log_date_format": "YYYY-MM-DD HH:mm Z",
+//      "interpreter": "./node_modules/.bin/ts-node"
     }
   ]
 }

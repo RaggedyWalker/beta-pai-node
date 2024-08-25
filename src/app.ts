@@ -1,12 +1,12 @@
 import Koa from 'koa';
-import json from 'koa-json';
+// import json from 'koa-json';
 import bodyparser from 'koa-bodyparser';
 import logger from 'koa-logger';
 import koa_static from 'koa-static';
 import cors from '@koa/cors';
 import routers from './routes';
-import errorHandler from './middleware/errorHandler.ts';
-import responseHandler from './middleware/responseHandler.ts';
+import errorHandler from './middleware/errorHandler';
+import responseHandler from './middleware/responseHandler';
 
 const app = new Koa();
 

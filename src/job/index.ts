@@ -1,5 +1,5 @@
-import stock from './stock.ts';
-import kLine from './kLine.ts';
+import stock from './stock';
+import kLine from './kLine';
 async function main() {
   const list = await stock.updateAllStock();
   console.log(list);

@@ -1,5 +1,5 @@
-import mairuiService from '../externalService/mairuiService.ts';
-import db, { truncate } from '../utils/db.ts';
+import mairuiService from '../externalService/mairuiService';
+import db, { truncate } from '../utils/db';
 
 type Stock = {
   stockName: string;

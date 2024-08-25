@@ -1,7 +1,7 @@
 import { Context, Next } from 'koa';
 // import akShareService from '../externalService/akShareService.ts';
 // import { ExternalRequestError } from '../exceptions/errors.ts';
-import db from '../utils/db.ts';
+import db from '../utils/db';
 import JSONBig from 'json-bigint';
 class StockController {
   public static async getDayLine(ctx: Context, next: Next): Promise<void> {

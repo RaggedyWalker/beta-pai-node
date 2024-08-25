@@ -1,7 +1,7 @@
-import db from '../utils/db.ts';
+import db from '../utils/db';
 import dayjs from 'dayjs';
-import akShareService from '../externalService/akShareService.ts';
-import { FetchResult } from '../types/utils.ts';
+import akShareService from '../externalService/akShareService';
+import { FetchResult } from '../types/utils';
 
 type Stock = {
   stockName: string;

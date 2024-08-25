@@ -1,5 +1,5 @@
 import { Context, Next } from 'koa';
-import { BusinessError } from '../types/utils.ts';
+import { BusinessError } from '../types/utils';
 const errorHandler = async (ctx: Context, next: Next) => {
   await next().catch((err: BusinessError) => {
     ctx.status = err.status || 500;
