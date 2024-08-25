@@ -2,9 +2,9 @@
   "apps": [
     {
       "name": "beta-node-server",
-      "script": "./dist/bin/www.js",
-//      "script": "ts-node",
-//      "args": "bin/www",
+//      "script": "./dist/bin/www.js",
+      "script": "ts-node",
+      "args": "bin/www",
       "instances": "max",
       "exec_mode": "cluster",
       "watch": true,
@@ -19,7 +19,7 @@
       "error_file": "./logs/pm2_xl_account_err.log",
       "out_file": "/dev/null",
       "log_date_format": "YYYY-MM-DD HH:mm Z",
-//      "interpreter": "./node_modules/.bin/ts-node"
+      "interpreter": "./node_modules/.bin/ts-node"
     }
   ]
 }
