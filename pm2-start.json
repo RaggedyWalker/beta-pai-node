@@ -2,10 +2,9 @@
   "apps": [
     {
       "name": "beta-node-server",
-//      "script": "./dist/bin/www.js",
       "script": "ts-node",
       "args": "bin/www",
-      "instances": "max",
+      "instances": "1",
       "exec_mode": "cluster",
       "watch": true,
       "watch_delay": 4000,
