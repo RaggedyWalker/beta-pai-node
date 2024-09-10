@@ -49,3 +49,10 @@ model StockDayLine {
   @@index([code])
   @@map("stock_day_line")
 }
+
+model StockUpdateStatus {
+  code       String   @id @db.VarChar(10)
+  updateTime DateTime @map("update_time") @db.Date
+
+  @@map("stock_update_status")
+}

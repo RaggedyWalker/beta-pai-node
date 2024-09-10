@@ -1,3 +1,4 @@
+import { BASE_URL } from '../config';
 import http from '../utils/http';
 import { AxiosResponse } from 'axios';
 
@@ -6,7 +7,7 @@ const akShareService = (
   params?: unknown
 ): Promise<AxiosResponse> => {
   return http.get(url, {
-    baseURL: 'http://127.0.0.1:8080/api/public/',
+    baseURL: BASE_URL + '/aktool/api/public/',
     params
   });
 };

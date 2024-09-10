@@ -2,6 +2,7 @@ import db from '../utils/db';
 import dayjs from 'dayjs';
 import akShareService from '../externalService/akShareService';
 import { FetchResult } from '../types/utils';
+import { Prisma } from '@prisma/client';
 
 type Stock = {
   stockName: string;
@@ -9,23 +10,20 @@ type Stock = {
   market: string;
 };
 
+let stockUpdateList: Prisma.StockUpdateStatusCreateInput[] = [];
+
 /**
  * 更新股票日线数据
  * @param stock
  */
 async function updateStockDayLine(stock: Stock) {
   const { stockCode } = stock;
-  const result = await db.stockDayLine.findFirst({
-    where: {
-      code: stockCode
-    },
-    orderBy: {
-      timestamp: 'desc'
-    }
-  });
+
+  const status = stockUpdateList.find(item => item.code === stockCode);
+  console.log(stockCode, ': ', status?.updateTime || 'no update history');
   // 用数据库中的已有最新日期t+1为开始时间
-  const startDate = result
-    ? dayjs(result.timestamp).add(1, 'day').format('YYYYMMDD')
+  const startDate = status
+    ? dayjs(status.updateTime).add(1, 'day').format('YYYYMMDD')
     : null;
   const list = await akShareService('stock_zh_a_hist', {
     symbol: stockCode,
@@ -33,13 +31,39 @@ async function updateStockDayLine(stock: Stock) {
     adjust: 'qfq',
     start_date: startDate
   });
-  await db.stockDayLine.createMany({
-    data: formatStockList(stockCode, list.data as FetchResult[])
-  });
+  if (list.data.length > 0) {
+    const chunk = 400;
+    const insert = [];
+    for (let i = 0; i < list.data.length; i += chunk) {
+      const subList = list.data.slice(i, i + chunk);
+      insert.push(
+        db.stockDayLine.createMany({
+          data: formatStockList(stockCode, subList)
+        })
+      );
+    }
+    const upsert = db.stockUpdateStatus.upsert({
+      where: {
+        code: stockCode
+      },
+      update: {
+        updateTime: new Date()
+      },
+      create: {
+        code: stockCode,
+        updateTime: new Date()
+      }
+    });
+    await db.$transaction([...insert, upsert]);
+    console.log('insert successfully');
+    // await new Promise(resolve => setTimeout(resolve, 200));
+  }
 }
 function formatStockList(stockCode: string, list: FetchResult[]) {
+  // 时间转换，因为aktool返回的是utc时间
+  const offset = new Date().getTimezoneOffset() * 60 * 1000;
   return list.map(item => {
-    const timestamp = new Date(item['日期']);
+    const timestamp = new Date(new Date(item['日期']).getTime() - offset);
     return {
       code: stockCode,
       timestamp,
@@ -71,14 +95,32 @@ async function updateALLStockDayLine(stockList: Stock[], step = 10) {
   let successCount = 0;
   const failStockList: Stock[] = [];
 
+  stockUpdateList = await db.stockUpdateStatus.findMany();
+
   for (let i = 0; i < total; i = i + step) {
     const subStockList = stockList.slice(i, i + step);
     await batchUpdateStockDayLine(subStockList);
   }
 
   async function batchUpdateStockDayLine(stockList: Stock[]) {
-    const promises = stockList.map(stock => update(stock));
+    const promises = stockList.map(update);
     await Promise.allSettled(promises);
+    // const currentLength = stockData.length;
+    // console.log('current stock data length: ', currentLength);
+    // if (currentLength >= 1 * 10000) {
+    //   const slice = 1000;
+    //   const tranJob = [];
+    //   for (let i = 0; i < currentLength; i += slice) {
+    //     tranJob.push(
+    //       db.stockDayLine.createMany({
+    //         data: stockData.slice(i, i + slice)
+    //       })
+    //     );
+    //   }
+    //   db.$transaction(tranJob);
+    //   stockData.length = 0;
+    //   console.log('batch insert stockDayLine length: ', currentLength);
+    // }
   }
   async function update(stock: Stock) {
     try {

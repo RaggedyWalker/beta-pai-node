@@ -9,6 +9,9 @@ import { Page } from '../entity/common';
 interface StockStrategyQuery {
   currentPage: number;
   pageSize: number;
+  query: {
+    status?: boolean;
+  };
 }
 
 class StockStrategyController {
@@ -96,12 +99,19 @@ class StockStrategyController {
    * @return {Promise<void>}
    */
   public static async getPage(ctx: Context, next: Next): Promise<void> {
-    const { pageSize, currentPage } = ctx.request.body as StockStrategyQuery;
+    const {
+      pageSize,
+      currentPage,
+      query = {}
+    } = ctx.request.body as StockStrategyQuery;
     const total = await db.stockPredict.count({});
     const page: Page<StrategyPropertiesResponse> =
       new Page<StrategyPropertiesResponse>();
     if (total > 0) {
       const list = await db.stockPredict.findMany({
+        where: {
+          status: query.status === undefined ? true : query.status
+        },
         skip: pageSize * (currentPage - 1),
         take: pageSize,
         orderBy: {

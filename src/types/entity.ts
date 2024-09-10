@@ -1,3 +1,4 @@
+// import { Prisma } from '@prisma/client';
 import { ConfidenceGradeEnum, PredictTrendEnum } from '../enums';
 
 export interface StrategyProperties {
@@ -12,3 +13,5 @@ export interface StrategyProperties {
   status: boolean;
   createTime: Date | null;
 }
+
+// Prisma.StockDayLineScalarFieldEnum
