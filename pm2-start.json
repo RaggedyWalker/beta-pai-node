@@ -10,7 +10,9 @@
       "watch_delay": 4000,
       "ignore_watch" : [
         "node_modules",
-        "src"
+        "src",
+        ".git",
+        "logs"
       ],
       "max_memory_restart": "1000M",
       "min_uptime": "5s",
