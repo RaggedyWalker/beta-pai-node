@@ -1,5 +1,6 @@
 import { Context, Next } from 'koa';
 import db from '../utils/db';
+import { BusinessError } from '../exceptions/errors';
 class TrainController {
   /**
    * 根据参数生成训练设置
@@ -16,29 +17,52 @@ class TrainController {
     };
     const config = {
       stockCode: '',
-      startDate: 0,
+      startDate: -1,
       period: requestBody.period,
       blind: requestBody.blind,
       revealTime: requestBody.revealTime
     };
     if (requestBody.blind) {
       const count = await db.stock.count();
-      const index = Math.round(Math.random() * count);
-      const randomStock = await db.stock.findMany({ skip: index, take: 1 });
-      config.stockCode = randomStock[0].stockCode;
-      config.startDate = await getRandomStartDate(
-        config.stockCode,
-        requestBody.period
-      );
+      while (config.startDate < 0) {
+        const index = Math.round(Math.random() * count);
+        const result = await db.stock.findMany({ skip: index, take: 1 });
+        config.stockCode = result[0].stockCode;
+        config.startDate = await getRandomStartDate(
+          result[0].stockCode,
+          requestBody.period
+        );
+      }
     } else {
       config.stockCode = requestBody.stockCode as string;
       if (requestBody.startDate) {
         config.startDate = requestBody.startDate;
+        const klines = await db.stockDayLine.findMany({
+          where: {
+            code: config.stockCode
+          },
+          orderBy: {
+            timestamp: 'asc'
+          }
+        });
+        const index = klines.findIndex(
+          item => config.startDate <= item.timestamp.getTime()
+        );
+        if (klines.length - 1 - index < requestBody.period) {
+          throw new BusinessError(
+            '所选周期大于股票存在时间，请重新选择股票或者周期'
+          );
+        }
       } else {
         config.startDate = await getRandomStartDate(
           config.stockCode,
           requestBody.period
         );
+        if (config.startDate < 0) {
+          throw new BusinessError(
+            '所选周期大于股票存在时间，请重新选择股票或者周期'
+          );
+        }
       }
     }
     ctx.body = config;
@@ -65,6 +89,9 @@ async function getRandomStartDate(stockCode: string, period: number) {
   });
   const _start = 0;
   const _end = klines.length - 1 - period;
+  if (_end < 0) {
+    return -1;
+  }
   console.log(Math.round(Math.random() * (_end - _start)));
   return klines[
     Math.round(Math.random() * (_end - _start))
