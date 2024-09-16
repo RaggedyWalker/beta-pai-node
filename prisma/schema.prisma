@@ -56,3 +56,24 @@ model StockUpdateStatus {
 
   @@map("stock_update_status")
 }
+
+model StockTrainRecord {
+  id        Int      @id @default(autoincrement())
+  code      String   @db.VarChar(10)
+  startDate DateTime @map("start_date") @db.Date
+  period    Int      @db.SmallInt
+  blind     Boolean  @default(false)
+
+  @@index([code])
+  @@map("stock_train_record")
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  userName String  @db.VarChar(10)
+  password String  @db.VarChar(32)
+  email    String? @db.VarChar(32)
+  phone    String? @db.VarChar(16)
+
+  @@map("user_info")
+}

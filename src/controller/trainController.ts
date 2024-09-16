@@ -65,7 +65,20 @@ class TrainController {
         }
       }
     }
-    ctx.body = config;
+    let record = undefined;
+    try {
+      record = await db.stockTrainRecord.create({
+        data: {
+          code: config.stockCode,
+          startDate: new Date(config.startDate),
+          period: config.period,
+          blind: config.blind
+        }
+      });
+    } catch (error) {
+      throw new BusinessError((error as Error).message);
+    }
+    ctx.body = { ...config, id: record.id };
     await next();
   }
 }
