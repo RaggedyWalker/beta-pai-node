@@ -1,5 +1,5 @@
 import Koa from 'koa';
-// import json from 'koa-json';
+import koajwt from 'koa-jwt';
 import bodyparser from 'koa-bodyparser';
 import logger from 'koa-logger';
 import koa_static from 'koa-static';
@@ -7,6 +7,8 @@ import cors from '@koa/cors';
 import routers from './routes';
 import errorHandler from './middleware/errorHandler';
 import responseHandler from './middleware/responseHandler';
+import { JWT_SECRET } from './config';
+import authHandler from './middleware/authHandler';
 
 const app = new Koa();
 
@@ -15,12 +17,13 @@ app.use(cors());
 app.use(logger());
 // error handler
 app.use(errorHandler);
+app.use(authHandler);
+
 app.use(
   bodyparser({
     enableTypes: ['json', 'form', 'text']
   })
 );
-// app.use(json());
 app.use(koa_static(__dirname + '/public'));
 // logger
 app.use(async (ctx, next) => {
@@ -29,6 +32,16 @@ app.use(async (ctx, next) => {
   const ms = new Date().getTime() - start.getTime();
   console.log(`${ctx.method} ${ctx.url} - ${ms}ms`);
 });
+// check token
+app.use(
+  koajwt({
+    secret: JWT_SECRET
+  }).unless({
+    // white list
+    path: ['/user/login', '/user/registry'] // 白名单路由
+  })
+);
+
 // routes
 routers.forEach(route => {
   app.use(route.routes());

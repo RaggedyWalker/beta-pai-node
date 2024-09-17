@@ -63,9 +63,12 @@ model StockTrainRecord {
   startDate DateTime @map("start_date") @db.Date
   period    Int      @db.SmallInt
   blind     Boolean  @default(false)
+  userId    Int      @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
 
   @@index([code])
   @@map("stock_train_record")
+
 }
 
 model User {
@@ -75,5 +78,6 @@ model User {
   email    String? @db.VarChar(32)
   phone    String? @db.VarChar(16)
 
+  stockTrainRecord StockTrainRecord[]
   @@map("user_info")
 }

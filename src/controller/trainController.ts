@@ -72,7 +72,8 @@ class TrainController {
           code: config.stockCode,
           startDate: new Date(config.startDate),
           period: config.period,
-          blind: config.blind
+          blind: config.blind,
+          userId: ctx.state.user.id
         }
       });
     } catch (error) {
