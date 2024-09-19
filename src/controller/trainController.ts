@@ -1,6 +1,7 @@
 import { Context, Next } from 'koa';
 import db from '../utils/db';
 import { BusinessError } from '../exceptions/errors';
+import Utils from '../utils';
 class TrainController {
   /**
    * 根据参数生成训练设置
@@ -65,21 +66,21 @@ class TrainController {
         }
       }
     }
-    let record = undefined;
     try {
-      record = await db.stockTrainRecord.create({
+      const user = Utils.user.getCurrentUser(ctx);
+      const record = await db.stockTrainRecord.create({
         data: {
           code: config.stockCode,
           startDate: new Date(config.startDate),
           period: config.period,
           blind: config.blind,
-          userId: ctx.state.user.id
+          userId: user.id
         }
       });
+      ctx.body = { ...config, id: record.id };
     } catch (error) {
       throw new BusinessError((error as Error).message);
     }
-    ctx.body = { ...config, id: record.id };
     await next();
   }
 }

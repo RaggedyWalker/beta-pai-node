@@ -42,9 +42,7 @@ class UserController {
     }
 
     const token = jwt.sign(
-      {
-        name: userName
-      },
+      user,
       JWT_SECRET, // secret
       { expiresIn: 12 * 60 * 60 } // 60 * 60 s
     );

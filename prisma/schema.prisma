@@ -78,6 +78,6 @@ model User {
   email    String? @db.VarChar(32)
   phone    String? @db.VarChar(16)
 
-  stockTrainRecord StockTrainRecord[]
+  stockTrainRecords StockTrainRecord[]
   @@map("user_info")
 }
