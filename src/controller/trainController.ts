@@ -83,6 +83,19 @@ class TrainController {
     }
     await next();
   }
+
+  static async getTrainData(ctx: Context, next: Next): Promise<void> {
+    const user = Utils.user.getCurrentUser(ctx);
+    const id = ctx.query.id;
+    const result = await db.stockTrainRecord.findFirst({
+      where: {
+        id: Number(id),
+        userId: user.id
+      }
+    });
+    ctx.body = result;
+    await next();
+  }
 }
 
 export default TrainController;

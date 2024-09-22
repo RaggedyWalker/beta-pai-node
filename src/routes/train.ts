@@ -6,5 +6,6 @@ const router = new Router({
 });
 router.allowedMethods();
 router.post('/init', TrainController.init);
+router.get('/getTrainData', TrainController.getTrainData);
 router.routes();
 export default router;
