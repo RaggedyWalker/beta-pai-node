@@ -2,6 +2,9 @@ import { Context, Next } from 'koa';
 import db from '../utils/db';
 import { BusinessError } from '../exceptions/errors';
 import Utils from '../utils';
+import dayjs from 'dayjs';
+// import JSONBig from 'json-bigint';
+
 class TrainController {
   /**
    * 根据参数生成训练设置
@@ -87,13 +90,36 @@ class TrainController {
   static async getTrainData(ctx: Context, next: Next): Promise<void> {
     const user = Utils.user.getCurrentUser(ctx);
     const id = ctx.query.id;
-    const result = await db.stockTrainRecord.findFirst({
+    const record = await db.stockTrainRecord.findFirst({
       where: {
         id: Number(id),
         userId: user.id
       }
     });
-    ctx.body = result;
+    if (!record) {
+      throw new BusinessError('训练记录不存在');
+    }
+    const startDate = dayjs(record.startDate).subtract(300, 'day');
+    const endDate = dayjs(record.startDate).add(record.period, 'day');
+    const klines = await db.stockDayLine.findMany({
+      where: {
+        AND: {
+          code: record.code,
+          timestamp: {
+            lt: endDate.toDate(),
+            gt: startDate.toDate()
+          }
+        }
+      }
+    });
+    ctx.body = {
+      config: record,
+      data: klines.map(item => ({
+        ...item,
+        volume: item.volume.toString()
+        // timestamp: item.timestamp.getTime()
+      }))
+    };
     await next();
   }
 }

@@ -1,6 +1,4 @@
 import { Context, Next } from 'koa';
-// import akShareService from '../externalService/akShareService.ts';
-// import { ExternalRequestError } from '../exceptions/errors.ts';
 import db from '../utils/db';
 import JSONBig from 'json-bigint';
 class StockController {
