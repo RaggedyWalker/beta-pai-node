@@ -1,8 +1,7 @@
 import { Context, Next } from 'koa';
 import CryptoJS, { MD5 } from 'crypto-js';
 import db from '../utils/db';
-import jwt from 'jsonwebtoken';
-import { JWT_SECRET } from '../config';
+import Utils from '../utils';
 /**
  * 1. 前端加密：固定salt对称加密
  * 2. 后端对称解密
@@ -41,11 +40,7 @@ class UserController {
       throw new Error('密码错误');
     }
 
-    const token = jwt.sign(
-      user,
-      JWT_SECRET, // secret
-      { expiresIn: 12 * 60 * 60 } // 60 * 60 s
-    );
+    const token = Utils.user.getUserToken(user);
     ctx.body = {
       token
     };
