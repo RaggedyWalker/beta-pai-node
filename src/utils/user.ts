@@ -12,7 +12,7 @@ export default {
     const token = jwt.sign(
       user,
       JWT_SECRET, // secret
-      { expiresIn: 60 } // 60 * 60 s
+      { expiresIn: 3 * 60 * 60 } // 60 * 60 s
     );
     return token;
   }

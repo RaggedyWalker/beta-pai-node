@@ -13,6 +13,7 @@ class TrainController {
    */
   public static async init(ctx: Context, next: Next): Promise<void> {
     const requestBody = ctx.request.body as {
+      stockName?: string;
       stockCode?: string;
       startDate?: number;
       period: number;
@@ -20,6 +21,7 @@ class TrainController {
       revealTime: boolean;
     };
     const config = {
+      stockName: '',
       stockCode: '',
       startDate: -1,
       period: requestBody.period,
@@ -31,6 +33,7 @@ class TrainController {
       while (config.startDate < 0) {
         const index = Math.round(Math.random() * count);
         const result = await db.stock.findMany({ skip: index, take: 1 });
+        config.stockName = result[0].stockName;
         config.stockCode = result[0].stockCode;
         config.startDate = await getRandomStartDate(
           result[0].stockCode,
@@ -38,6 +41,7 @@ class TrainController {
         );
       }
     } else {
+      config.stockName = requestBody.stockName as string;
       config.stockCode = requestBody.stockCode as string;
       if (requestBody.startDate) {
         config.startDate = requestBody.startDate;
@@ -73,6 +77,7 @@ class TrainController {
       const user = Utils.user.getCurrentUser(ctx);
       const record = await db.stockTrainRecord.create({
         data: {
+          name: config.stockName,
           code: config.stockCode,
           startDate: new Date(config.startDate),
           period: config.period,

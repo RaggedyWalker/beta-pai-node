@@ -59,6 +59,7 @@ model StockUpdateStatus {
 
 model StockTrainRecord {
   id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(10) @default("")
   code      String   @db.VarChar(10)
   startDate DateTime @map("start_date") @db.Date
   period    Int      @db.SmallInt
