@@ -121,6 +121,11 @@ class TrainController {
       config: record,
       data: klines.map(item => ({
         ...item,
+        open: item.open.toNumber(),
+        close: item.close.toNumber(),
+        high: item.high.toNumber(),
+        low: item.low.toNumber(),
+        amount: item.amount.toNumber(),
         volume: item.volume.toString()
         // timestamp: item.timestamp.getTime()
       }))

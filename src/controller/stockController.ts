@@ -30,6 +30,11 @@ class StockController {
       JSONBig.stringify(
         data.map(item => ({
           ...item,
+          open: item.open.toNumber(),
+          close: item.close.toNumber(),
+          high: item.high.toNumber(),
+          low: item.low.toNumber(),
+          amount: item.amount.toNumber(),
           timestamp: item.timestamp.getTime()
         }))
       )
