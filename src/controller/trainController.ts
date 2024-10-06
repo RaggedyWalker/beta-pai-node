@@ -3,6 +3,7 @@ import db from '../utils/db';
 import { BusinessError } from '../exceptions/errors';
 import Utils from '../utils';
 import dayjs from 'dayjs';
+import { Transaction } from '../types/entity';
 // import JSONBig from 'json-bigint';
 
 class TrainController {
@@ -99,12 +100,15 @@ class TrainController {
       where: {
         id: Number(id),
         userId: user.id
+      },
+      include: {
+        StockTrainTransactions: true
       }
     });
     if (!record) {
       throw new BusinessError('训练记录不存在');
     }
-    const startDate = dayjs(record.startDate).subtract(300, 'day');
+    const startDate = dayjs(record.startDate).subtract(200 * 3, 'day');
     const endDate = dayjs(record.startDate).add(record.period, 'day');
     const klines = await db.stockDayLine.findMany({
       where: {
@@ -126,10 +130,57 @@ class TrainController {
         high: item.high.toNumber(),
         low: item.low.toNumber(),
         amount: item.amount.toNumber(),
-        volume: item.volume.toString()
-        // timestamp: item.timestamp.getTime()
-      }))
+        volume: item.volume.toString(),
+        timestamp: item.timestamp.getTime()
+      })),
+      transactions: record.StockTrainTransactions || []
     };
+    await next();
+  }
+
+  static async finishTrain(ctx: Context, next: Next): Promise<void> {
+    const requestBody = ctx.request.body as {
+      id: number;
+      transactions: Transaction[];
+    };
+    const user = Utils.user.getCurrentUser(ctx);
+    const record = await db.stockTrainRecord.findFirst({
+      where: {
+        id: Number(requestBody.id),
+        userId: user.id
+      }
+    });
+    if (!record) {
+      throw new BusinessError('训练记录不存在');
+    }
+    await db.stockTrainRecord.update({
+      where: { id: requestBody.id },
+      data: {
+        finished: true
+      }
+    });
+    await db.stockTrainTransactions.createMany({
+      data: requestBody.transactions.map(item => ({
+        ...item,
+        recordId: requestBody.id,
+        date: new Date(item.date)
+      }))
+    });
+    ctx.body = {};
+    next();
+  }
+
+  static async myTrainHistory(ctx: Context, next: Next): Promise<void> {
+    const user = Utils.user.getCurrentUser(ctx);
+    const record = await db.stockTrainRecord.findMany({
+      where: {
+        userId: user.id
+      },
+      orderBy: {
+        createDate: 'desc'
+      }
+    });
+    ctx.body = record;
     await next();
   }
 }

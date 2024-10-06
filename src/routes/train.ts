@@ -7,5 +7,7 @@ const router = new Router({
 router.allowedMethods();
 router.post('/init', TrainController.init);
 router.get('/getTrainData', TrainController.getTrainData);
+router.post('/finishTrain', TrainController.finishTrain);
+router.post('/myTrainHistory', TrainController.myTrainHistory);
 router.routes();
 export default router;

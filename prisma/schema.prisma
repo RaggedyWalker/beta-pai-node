@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -58,18 +59,33 @@ model StockUpdateStatus {
 }
 
 model StockTrainRecord {
-  id        Int      @id @default(autoincrement())
-  name      String   @db.VarChar(10) @default("")
-  code      String   @db.VarChar(10)
-  startDate DateTime @map("start_date") @db.Date
-  period    Int      @db.SmallInt
-  blind     Boolean  @default(false)
-  userId    Int      @map("user_id")
-  user      User     @relation(fields: [userId], references: [id])
+  id                     Int                      @id @default(autoincrement())
+  name                   String                   @default("") @db.VarChar(10)
+  code                   String                   @db.VarChar(10)
+  startDate              DateTime                 @map("start_date") @db.Date
+  period                 Int                      @db.SmallInt
+  blind                  Boolean                  @default(false)
+  userId                 Int                      @map("user_id")
+  user                   User                     @relation(fields: [userId], references: [id])
+  finished               Boolean                  @default(false)
+  createDate             DateTime                 @default(now()) @map("create_date")
+  StockTrainTransactions StockTrainTransactions[]
 
   @@index([code])
   @@map("stock_train_record")
+}
 
+model StockTrainTransactions {
+  id          Int              @id @default(autoincrement())
+  date        DateTime         @db.Date
+  price       Float            @db.Float
+  amount      Int              @db.Int
+  direction   Int              @db.SmallInt
+  recordId    Int              @map("record_id")
+  trainRecord StockTrainRecord @relation(fields: [recordId], references: [id])
+
+  @@index([id])
+  @@map("stock_train_transactions")
 }
 
 model User {
@@ -80,5 +96,6 @@ model User {
   phone    String? @db.VarChar(16)
 
   stockTrainRecords StockTrainRecord[]
+
   @@map("user_info")
 }
