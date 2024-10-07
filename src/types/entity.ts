@@ -26,3 +26,10 @@ export interface Transaction {
   amount: number;
   direction: TransDirection;
 }
+
+export enum UserRole {
+  ADMIN,
+  USER,
+  VIP,
+  PREMIUM
+}

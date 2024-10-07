@@ -94,6 +94,7 @@ model User {
   password String  @db.VarChar(32)
   email    String? @db.VarChar(32)
   phone    String? @db.VarChar(16)
+  role     Int     @db.TinyInt @default(1) 
 
   stockTrainRecords StockTrainRecord[]
 

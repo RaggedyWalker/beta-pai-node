@@ -33,6 +33,7 @@ class UserController {
         userName
       }
     });
+
     if (!user) {
       throw new Error('用户不存在');
     }
@@ -42,7 +43,14 @@ class UserController {
 
     const token = Utils.user.getUserToken(user);
     ctx.body = {
-      token
+      token,
+      info: {
+        id: user.id,
+        userName: user.userName,
+        role: user.role,
+        email: user.email,
+        phone: user.phone
+      }
     };
 
     await next();

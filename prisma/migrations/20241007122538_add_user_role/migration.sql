@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `user_info` ADD COLUMN `role` TINYINT NOT NULL DEFAULT 1;
