@@ -18,11 +18,12 @@
     "build": "npm run clear;tsc",
     "start:prod": "pm2 startOrReload pm2-start.json",
     "job": "ts-node src/job"
-  },  
+  },
   "dependencies": {
     "@koa/cors": "^4.0.0",
     "@koa/router": "^12.0.1",
     "@prisma/client": "^5.4.2",
+    "@types/nodemailer": "^6.4.16",
     "axios": "^1.6.2",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.10",
@@ -40,6 +41,7 @@
     "koa-onerror": "^4.1.0",
     "koa-static": "^5.0.0",
     "koa-views": "^6.2.0",
+    "nodemailer": "^6.9.15",
     "pug": "^2.0.3"
   },
   "devDependencies": {

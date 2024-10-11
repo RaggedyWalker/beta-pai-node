@@ -38,7 +38,13 @@ app.use(
     secret: JWT_SECRET
   }).unless({
     // white list
-    path: ['/user/login', '/user/registry'] // 白名单路由
+    path: [
+      '/user/login',
+      '/user/registry',
+      '/user/applyForAccount',
+      '/user/checkIfUserExist',
+      '/user/resetpw'
+    ] // 白名单路由
   })
 );
 
