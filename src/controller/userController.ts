@@ -28,7 +28,7 @@ class UserController {
 
     const user = await db.user.findFirst({
       where: {
-        userName
+        OR: [{ userName }, { email: userName }]
       }
     });
 
