@@ -108,7 +108,7 @@ class TrainController {
     if (!record) {
       throw new BusinessError('训练记录不存在');
     }
-    const startDate = dayjs(record.startDate).subtract(200 * 3, 'day');
+    const startDate = dayjs(record.startDate).subtract(250 * 5, 'day');
     const endDate = dayjs(record.startDate).add(record.period, 'day');
     const klines = await db.stockDayLine.findMany({
       where: {
