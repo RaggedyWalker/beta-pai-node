@@ -5,6 +5,7 @@ import db from '../utils/db';
 import Utils from '../utils';
 import { sendMail } from '../utils/mail';
 import { INVITE_KEY } from '../config';
+import { ApplyStatus } from '@prisma/client';
 /**
  * 1. 前端加密：固定salt对称加密
  * 2. 后端对称解密
@@ -60,14 +61,14 @@ class UserController {
    * @param next
    */
   static async registry(ctx: Context, next: Next): Promise<void> {
-    const user = await registryService(
-      ctx.request.body as {
-        userName: string;
-        password: string;
-        email?: string;
-        phone?: string;
-      }
-    );
+    const userReq = ctx.request.body as {
+      userName: string;
+      password: string;
+      email?: string;
+      phone?: string;
+    };
+    await checkUserExist(userReq);
+    const user = await registryService(userReq);
     ctx.body = user;
     await next();
   }
@@ -84,6 +85,7 @@ class UserController {
 
   /**
    * 申请账号
+   * 校验：是否申请过，是否存在该用户
    * 有邀请码直接通过程序创建用户
    * 没有邀请码需要发送邮件人工审核，
    * @param ctx
@@ -103,12 +105,22 @@ class UserController {
       reason: string;
       inviteKey?: string;
     };
+    const searchBody: {
+      userName: string;
+      email?: string;
+      phone?: string;
+    } = {
+      userName
+    };
+    email && (searchBody.email = email);
+    phone && (searchBody.phone = phone);
+    await checkApplyExist(searchBody);
+    await checkUserExist(searchBody);
     const pwd = CryptoJS.MD5(userName + email + phone)
       .toString()
       .substring(0, 12);
-    if (inviteKey !== undefined) {
+    if (inviteKey) {
       if (inviteKey === INVITE_KEY) {
-        // 创建用户
         await registryService({
           userName,
           password: pwd,
@@ -123,16 +135,21 @@ class UserController {
         throw new BusinessError('邀请码不正确');
       }
     } else {
-      await checkUserReq({
-        userName,
-        email,
-        phone
-      });
       try {
+        await db.accountApplication.create({
+          data: {
+            userName,
+            origin: pwd,
+            email,
+            phone,
+            inviteKey,
+            reason
+          }
+        });
         await sendMail({
           subject: '【来自betaeye的消息】用户账号申请',
           html: `
-          <div>
+          <div style="padding: 1rem 2rem;">
             <h1>账号申请</h1>
             <p>用户名：${userName}</p>
             <p>邮箱：${email}</p>
@@ -140,14 +157,16 @@ class UserController {
             <p>申请原因：${reason}</p>
             <p>邀请码：${inviteKey ? inviteKey + '✅' : ''} </p>
             <p>生成密码：${pwd} </p>
+            <div><a href="https://betaeye.top/eye/background" target="_blank">前往验证</a></div>
           </div>
         `
         });
         ctx.body = {
-          message: `申请成功, 请保存您的初始登录密码：${pwd}，请耐心等待审核通过`
+          message: '申请成功，请耐心等待审核通过邮件通知'
         };
         next();
       } catch (e) {
+        console.error(e);
         throw new BusinessError('账号申请失败，请过一段时间重试');
       }
     }
@@ -163,7 +182,7 @@ class UserController {
       email?: string;
       phone?: string;
     };
-    await checkUserReq({
+    await checkUserExist({
       userName,
       email,
       phone
@@ -204,6 +223,110 @@ class UserController {
     ctx.body = result;
     next();
   }
+
+  static async info(ctx: Context, next: Next) {
+    const user = Utils.user.getCurrentUser(ctx);
+    ctx.body = {
+      id: user.id,
+      userName: user.userName,
+      role: user.role,
+      email: user.email,
+      phone: user.phone
+    };
+    next();
+  }
+
+  static async getAccountApplicationList(ctx: Context, next: Next) {
+    const { userName } = ctx.request.body as {
+      userName?: string;
+    };
+    const list = await db.accountApplication.findMany({
+      where: {
+        userName: userName,
+        applyStatus: ApplyStatus.PENDING
+      },
+      orderBy: {
+        createDate: 'desc'
+      }
+    });
+    ctx.body = list.map(item => ({
+      userName: item.userName,
+      reason: item.reason,
+      id: item.id,
+      createDate: item.createDate
+    }));
+    next();
+  }
+
+  static async approveAccountApplication(ctx: Context, next: Next) {
+    const { id } = ctx.request.body as {
+      id: number;
+    };
+    const result = await db.accountApplication.findUnique({
+      where: {
+        id
+      }
+    });
+    if (result && result.email) {
+      await registryService({
+        userName: result.userName,
+        password: result.origin,
+        email: result.email,
+        phone: result.phone || undefined
+      });
+      await db.accountApplication.update({
+        where: {
+          id
+        },
+        data: {
+          applyStatus: ApplyStatus.RESOLVE
+        }
+      });
+      await sendMail({
+        to: result.email,
+        subject: '【来自betaeye的消息】账号申请通过',
+        html: `
+        <div style="padding: 1rem 2rem;">
+          <h1>账号申请通过</h1>
+          <p>申请账号：${result.userName}</p>
+          <p>请保存您的初始登录密码：${result.origin}</p>
+        </div>
+      `
+      });
+    }
+    ctx.body = result;
+    next();
+  }
+
+  static async rejectAccountApplication(ctx: Context, next: Next) {
+    const { id, reason = '申请理由未通过' } = ctx.request.body as {
+      id: number;
+      reason?: string;
+    };
+    const result = await db.accountApplication.update({
+      where: {
+        id
+      },
+      data: {
+        applyStatus: ApplyStatus.REJECT
+      }
+    });
+    if (result.email) {
+      await sendMail({
+        to: result.email,
+        subject: '【来自betaeye的消息】账号申请未通过',
+        html: `
+        <div style="padding: 1rem 2rem;">
+          <h1>账号申请未通过</h1>
+          <p>申请账号：${result.userName}</p>
+          <p>拒绝理由：${reason}</p>
+        </div>
+      `
+      });
+    }
+    ctx.body = result;
+    next();
+  }
 }
 
 export default UserController;
@@ -220,7 +343,6 @@ async function registryService(userReq: {
   phone?: string;
 }) {
   const { userName, password, email, phone } = userReq;
-  await checkUserReq(userReq);
   if (!password) {
     throw new Error('用户密码不能为空');
   }
@@ -237,11 +359,11 @@ async function registryService(userReq: {
 }
 
 /**
- * 校验用户信息
+ * 校验用户是否存在
  * @param userReq
  * @returns
  */
-async function checkUserReq(userReq: {
+async function checkUserExist(userReq: {
   userName: string;
   email?: string;
   phone?: string;
@@ -272,6 +394,33 @@ async function checkUserReq(userReq: {
     throw new Error('用户已存在');
   }
   return result;
+}
+
+async function checkApplyExist(userReq: {
+  userName: string;
+  email?: string;
+  phone?: string;
+}) {
+  const OR: { [key: string]: string | undefined }[] = [];
+  Object.entries(userReq).map(([key, value]) => {
+    if (value) {
+      OR.push({
+        [key]: value
+      });
+    }
+  });
+  console.log(OR);
+
+  const existedApply = await db.accountApplication.findFirst({
+    where: {
+      OR
+    }
+  });
+  console.log(existedApply);
+
+  if (existedApply) {
+    throw new Error('该账户已经申请过');
+  }
 }
 
 function decryptoPassword(password: string) {

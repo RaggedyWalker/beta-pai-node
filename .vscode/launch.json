@@ -1,5 +1,6 @@
 {
     "configurations": [
+
     {
         "name": "ts-node",
         "type": "node",
@@ -12,6 +13,21 @@
             "ts-node/register"
         ],
         "cwd": "${workspaceRoot}",
+        "protocol": "inspector",
+        "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+        "name": "start:dev",
+        "type": "node",
+        "request": "launch",
+        "args": [
+            "${relativeFile}"
+        ],
+        "runtimeArgs": [
+            "-r",
+            "ts-node/register"
+        ],
+        "cwd": "${workspaceRoot}/bin/www.ts",
         "protocol": "inspector",
         "internalConsoleOptions": "openOnSessionStart"
     }

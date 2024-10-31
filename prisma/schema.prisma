@@ -23,7 +23,7 @@ model StockPredict {
   stockCode       String    @map("stock_code") @db.VarChar(20)
   stockName       String?   @map("stock_name") @db.VarChar(20)
   comment         String?   @db.VarChar(200)
-  createTime      DateTime? @default(now()) @map("create_time") @db.DateTime(0)
+  createTime      DateTime? @default(now()) @map("create_time")
   confidenceGrade Int?      @map("confidence_grade") @db.TinyInt
   predictTrend    Int?      @map("predict_trend") @db.TinyInt
   goalPrice       Decimal   @map("goal_price") @db.Decimal(8, 2)
@@ -90,13 +90,33 @@ model StockTrainTransactions {
 
 model User {
   id       Int     @id @default(autoincrement())
-  userName String  @db.VarChar(10)
+  userName String  @db.VarChar(20)
   password String  @db.VarChar(32)
   email    String? @db.VarChar(32)
   phone    String? @db.VarChar(16)
-  role     Int     @db.TinyInt @default(1) 
+  role     Int     @default(1) @db.TinyInt
 
   stockTrainRecords StockTrainRecord[]
 
   @@map("user_info")
+}
+
+model AccountApplication {
+  id          Int         @id @default(autoincrement())
+  userName    String      @db.VarChar(20)
+  origin      String      @db.VarChar(32)
+  email       String?     @db.VarChar(32)
+  phone       String?     @db.VarChar(16)
+  reason      String?     @db.VarChar(20)
+  inviteKey   String?     @map("invite_key") @db.VarChar(20)
+  createDate  DateTime?   @default(now()) @map("create_date")
+  applyStatus ApplyStatus @default(PENDING) @map("apply_status")
+
+  @@map("account_application")
+}
+
+enum ApplyStatus {
+  PENDING
+  RESOLVE
+  REJECT
 }
