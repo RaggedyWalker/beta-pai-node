@@ -142,6 +142,7 @@ class TrainController {
     const requestBody = ctx.request.body as {
       id: number;
       transactions: Transaction[];
+      endingGrowthPct: number;
     };
     const user = Utils.user.getCurrentUser(ctx);
     const record = await db.stockTrainRecord.findFirst({
@@ -156,7 +157,8 @@ class TrainController {
     await db.stockTrainRecord.update({
       where: { id: requestBody.id },
       data: {
-        finished: true
+        finished: true,
+        endingGrowthPct: requestBody.endingGrowthPct
       }
     });
     await db.stockTrainTransactions.createMany({
@@ -178,6 +180,9 @@ class TrainController {
       },
       orderBy: {
         createDate: 'desc'
+      },
+      include: {
+        StockTrainTransactions: true
       }
     });
     ctx.body = record;

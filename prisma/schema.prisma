@@ -70,6 +70,7 @@ model StockTrainRecord {
   finished               Boolean                  @default(false)
   createDate             DateTime                 @default(now()) @map("create_date")
   StockTrainTransactions StockTrainTransactions[]
+  endingGrowthPct        Float?                   @map("ending_growth_pct") @db.Float
 
   @@index([code])
   @@map("stock_train_record")
