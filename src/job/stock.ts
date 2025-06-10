@@ -12,7 +12,7 @@ async function updateAllStock(): Promise<Stock[]> {
   const list = data.data
     .filter(item => !item.mc.includes('*ST'))
     .map(item => ({
-      stockName: item.mc,
+      stockName: item.mc.split('.')[0],
       stockCode: item.dm,
       market: item.jys.toUpperCase()
     }));
