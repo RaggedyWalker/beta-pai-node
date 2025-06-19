@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import akShareService from '../externalService/akShareService';
 import { FetchResult } from '../types/utils';
 import { Prisma } from '@prisma/client';
+import Bottleneck from 'bottleneck';
 
 type Stock = {
   stockName: string;
@@ -12,8 +13,16 @@ type Stock = {
 
 let stockUpdateList: Prisma.StockUpdateStatusCreateInput[] = [];
 
+const max = 500;
+const limiter = new Bottleneck({
+  maxConcurrent: 1,
+  reservoir: max, // 每分钟最多可用令牌数
+  reservoirRefreshAmount: max,
+  reservoirRefreshInterval: 60 * 1000 // 每分钟重置
+});
+
 /**
- * 更新股票日线数据
+ * 更新一个股票日线数据
  * @param stock
  */
 async function updateStockDayLine(stock: Stock) {
@@ -56,7 +65,6 @@ async function updateStockDayLine(stock: Stock) {
     });
     await db.$transaction([...insert, upsert]);
     console.log('insert successfully');
-    // await new Promise(resolve => setTimeout(resolve, 200));
   }
 }
 function formatStockList(stockCode: string, list: FetchResult[]) {
@@ -103,7 +111,7 @@ async function updateALLStockDayLine(stockList: Stock[], step = 10) {
   }
 
   async function batchUpdateStockDayLine(stockList: Stock[]) {
-    const promises = stockList.map(update);
+    const promises = stockList.map(limiter.wrap(update));
     await Promise.allSettled(promises);
     // const currentLength = stockData.length;
     // console.log('current stock data length: ', currentLength);
