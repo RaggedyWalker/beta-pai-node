@@ -1,9 +1,8 @@
 import db from '../utils/db';
 import dayjs from 'dayjs';
-import akShareService from '../externalService/akShareService';
-import { FetchResult } from '../types/utils';
 import { Prisma } from '@prisma/client';
 import Bottleneck from 'bottleneck';
+import { queryHistoryKline } from '../service/stock';
 
 type Stock = {
   stockName: string;
@@ -27,27 +26,21 @@ const limiter = new Bottleneck({
  */
 async function updateStockDayLine(stock: Stock) {
   const { stockCode } = stock;
-
   const status = stockUpdateList.find(item => item.code === stockCode);
   console.log(stockCode, ': ', status?.updateTime || 'no update history');
   // 用数据库中的已有最新日期t+1为开始时间
   const startDate = status
-    ? dayjs(status.updateTime).add(1, 'day').format('YYYYMMDD')
-    : null;
-  const list = await akShareService('stock_zh_a_hist', {
-    symbol: stockCode,
-    period: 'daily',
-    adjust: 'qfq',
-    start_date: startDate
-  });
-  if (list.data.length > 0) {
+    ? dayjs(status.updateTime).add(1, 'day').format('YYYY-MM-DD')
+    : dayjs('2005-01-01').format('YYYY-MM-DD');
+  const list = await queryHistoryKline(stockCode, startDate);
+  if (list.length > 0) {
     const chunk = 400;
     const insert = [];
-    for (let i = 0; i < list.data.length; i += chunk) {
-      const subList = list.data.slice(i, i + chunk);
+    for (let i = 0; i < list.length; i += chunk) {
+      const subList = list.slice(i, i + chunk);
       insert.push(
         db.stockDayLine.createMany({
-          data: formatStockList(stockCode, subList)
+          data: subList
         })
       );
     }
@@ -67,25 +60,26 @@ async function updateStockDayLine(stock: Stock) {
     console.log('insert successfully');
   }
 }
-function formatStockList(stockCode: string, list: FetchResult[]) {
-  // 时间转换，因为aktool返回的是utc时间
-  const offset = new Date().getTimezoneOffset() * 60 * 1000;
-  return list.map(item => {
-    const timestamp = new Date(new Date(item['日期']).getTime() - offset);
-    return {
-      code: stockCode,
-      timestamp,
-      open: item['开盘'] as number,
-      close: item['收盘'] as number,
-      high: item['最高'] as number,
-      low: item['最低'] as number,
-      volume: item['成交量'] as number,
-      amount: item['成交额'] as number,
-      growthPct: item['涨跌幅'] as number,
-      ampPct: item['振幅'] as number
-    };
-  });
-}
+
+// function formatStockList(stockCode: string, list: FetchResult[]) {
+//   // 时间转换，因为aktool返回的是utc时间
+//   const offset = new Date().getTimezoneOffset() * 60 * 1000;
+//   return list.map(item => {
+//     const timestamp = new Date(new Date(item['日期']).getTime() - offset);
+//     return {
+//       code: stockCode,
+//       timestamp,
+//       open: item['开盘'] as number,
+//       close: item['收盘'] as number,
+//       high: item['最高'] as number,
+//       low: item['最低'] as number,
+//       volume: item['成交量'] as number,
+//       amount: item['成交额'] as number,
+//       growthPct: item['涨跌幅'] as number,
+//       ampPct: item['振幅'] as number
+//     };
+//   });
+// }
 
 /**
  *  更新所有股票日线数据

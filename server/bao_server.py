@@ -35,7 +35,7 @@ def query_kline():
     code = content.get('code')
     start_date = content.get('start_date')
     end_date = content.get('end_date')
-    adjustflag = content.get('adjust')  # 默认前复权
+    adjustflag = content.get('adjust') or '2'  # 默认前复权
     if not code:
         return jsonify({"error": "Missing stock code"}), 400
 
