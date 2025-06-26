@@ -20,7 +20,7 @@ const queryHistoryKline = async (
   start: string,
   end?: string
 ): Promise<StockDayLine[]> => {
-  const url = 'https://localhost:5050/query-history-kline';
+  const url = 'http://localhost:5050/query-history-kline';
   const params = {
     code,
     start_date: start,
