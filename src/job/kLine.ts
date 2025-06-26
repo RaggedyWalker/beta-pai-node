@@ -12,7 +12,7 @@ type Stock = {
 
 let stockUpdateList: Prisma.StockUpdateStatusCreateInput[] = [];
 
-const max = 199;
+const max = 1500;
 const limiter = new Bottleneck({
   maxConcurrent: 1,
   reservoir: max, // 每分钟最多可用令牌数
