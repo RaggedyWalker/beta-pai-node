@@ -45,7 +45,7 @@ const queryHistoryKline = async (
 const formatter = (data: BaoKline) => {
   // 保留两位小数
   return {
-    code: data.code.toUpperCase(),
+    code: data.code.split('.')[1], // sh.600001
     timestamp: dayjs(data.date).format(),
     open: parseFloat(parseFloat(data.open).toFixed(2)),
     close: parseFloat(parseFloat(data.close).toFixed(2)),

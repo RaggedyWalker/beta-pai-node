@@ -25,14 +25,17 @@ const limiter = new Bottleneck({
  * @param stock
  */
 async function updateStockDayLine(stock: Stock) {
-  const { stockCode } = stock;
+  const { stockCode, market } = stock;
   const status = stockUpdateList.find(item => item.code === stockCode);
   console.log(stockCode, ': ', status?.updateTime || 'no update history');
   // 用数据库中的已有最新日期t+1为开始时间
   const startDate = status
     ? dayjs(status.updateTime).add(1, 'day').format('YYYY-MM-DD')
     : dayjs('2005-01-01').format('YYYY-MM-DD');
-  const list = await queryHistoryKline(stockCode, startDate);
+  const list = await queryHistoryKline(
+    [market, stockCode].join('.'),
+    startDate
+  );
   if (list.length > 0) {
     const chunk = 400;
     const insert = [];
