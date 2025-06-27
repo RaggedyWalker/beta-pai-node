@@ -28,11 +28,7 @@ const queryHistoryKline = async (
     adjust: '2'
   };
   try {
-    const response = await http(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+    const response = await http.get(url, {
       params: params
     });
     return response.data.data.map(formatter);
