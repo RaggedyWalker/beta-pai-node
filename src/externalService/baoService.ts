@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import http from '../utils/http';
 import { StockDayLine } from '@prisma/client';
+import { BASE_URL } from '../config';
 
 interface BaoKline {
   date: string;
@@ -20,7 +21,7 @@ const queryHistoryKline = async (
   start: string,
   end?: string
 ): Promise<StockDayLine[]> => {
-  const url = 'http://localhost:5050/query-history-kline';
+  const url = `http://${BASE_URL}:5050/query-history-kline`;
   const params = {
     code,
     start_date: start,

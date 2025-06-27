@@ -7,7 +7,7 @@ const akShareService = (
   params?: unknown
 ): Promise<AxiosResponse> => {
   return http.get(url, {
-    baseURL: BASE_URL + '/aktool/api/public/',
+    baseURL: BASE_URL + ':80' + '/aktool/api/public/',
     params
   });
 };
