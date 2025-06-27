@@ -45,7 +45,7 @@ model StockDayLine {
   timestamp DateTime @map("time") @db.Date
   unit      String   @default("元") @db.VarChar(4)
   growthPct Float    @map("growth_pct") @db.Float
-  ampPct    Float?    @map("amp_pct") @db.Float
+  ampPct    Float?   @map("amp_pct") @db.Float
 
   @@index([code])
   @@map("stock_day_line")
